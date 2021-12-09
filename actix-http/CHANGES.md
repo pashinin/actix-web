@@ -14,7 +14,12 @@
 * `header::QualityItem::{max, min}`. [#2486]
 * `header::Quality::{MAX, MIN}`. [#2486]
 * `impl Display` for `header::Quality`. [#2486]
+* Connection data set through the `on_connect_ext` callbacks is now accessible only from the new `Request::conn_data()` method. [#2491]
+* `Request::take_conn_data()`. [#2491]
+* `Request::take_req_data()`. [#2487]
+* `impl Clone` for `RequestHead`. [#2487]
 * `impl Eq` for `header::ContentEncoding`. [#????]
+* New methods on `MessageBody` trait, `is_complete_body` and `take_complete_body`, both with default implementations, for optimisations on body types that are done in exactly one poll/chunk. [#2497]
 
 ### Changed
 * Rename `body::BoxBody::{from_body => new}`. [#2468]
@@ -39,7 +44,10 @@
 [#2468]: https://github.com/actix/actix-web/pull/2468
 [#1920]: https://github.com/actix/actix-web/pull/1920
 [#2486]: https://github.com/actix/actix-web/pull/2486
+[#2487]: https://github.com/actix/actix-web/pull/2487
 [#2488]: https://github.com/actix/actix-web/pull/2488
+[#2491]: https://github.com/actix/actix-web/pull/2491
+[#2497]: https://github.com/actix/actix-web/pull/2497
 [#????]: https://github.com/actix/actix-web/pull/????
 
 

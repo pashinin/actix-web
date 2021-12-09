@@ -7,17 +7,26 @@
 * `Range` typed header. [#2485]
 * `HttpResponse::map_into_{left,right}_body` and `HttpResponse::map_into_boxed_body`. [#2468]
 * `ServiceResponse::map_into_{left,right}_body` and `HttpResponse::map_into_boxed_body`. [#2468]
+* Connection data set through the `HttpServer::on_connect` callback is now accessible only from the new `HttpRequest::conn_data()` and `ServiceRequest::conn_data()` methods. [#2491]
+* `HttpRequest::{req_data,req_data_mut}`. [#2487]
+* `ServiceResponse::into_parts`. [#2499]
 
 ### Changed
 * Rename `Accept::{mime_precedence => ranked}`. [#2480]
 * Rename `Accept::{mime_preference => preference}`. [#2480]
 * Un-deprecate `App::data_factory`. [#2484]
 * `HttpRequest::url_for` no longer constructs URLs with query or fragment components. [#2430]
+* Remove `B` (body) type parameter on `App`. [#2493]
+* Add `B` (body) type parameter on `Scope`. [#2492]
+* Request-local data container is no longer part of a `RequestHead`. Instead it is a distinct part of a `Request`. [#2487]
 
 ### Fixed
 * Accept wildcard `*` items in `AcceptLanguage`. [#2480]
 * Re-exports `dev::{BodySize, MessageBody, SizedStream}`. They are exposed through the `body` module. [#2468]
 * Typed headers containing lists that require one or more items now enforce this minimum. [#2482]
+
+### Removed
+* `ConnectionInfo::get`. [#2487]
 
 [#2430]: https://github.com/actix/actix-web/pull/2430
 [#2468]: https://github.com/actix/actix-web/pull/2468
@@ -25,6 +34,11 @@
 [#2482]: https://github.com/actix/actix-web/pull/2482
 [#2484]: https://github.com/actix/actix-web/pull/2484
 [#2485]: https://github.com/actix/actix-web/pull/2485
+[#2487]: https://github.com/actix/actix-web/pull/2487
+[#2491]: https://github.com/actix/actix-web/pull/2491
+[#2492]: https://github.com/actix/actix-web/pull/2492
+[#2493]: https://github.com/actix/actix-web/pull/2493
+[#2499]: https://github.com/actix/actix-web/pull/2499
 
 
 ## 4.0.0-beta.13 - 2021-11-30

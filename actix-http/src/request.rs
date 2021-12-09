@@ -1,8 +1,10 @@
 //! HTTP requests.
 
 use std::{
-    cell::{Ref, RefMut},
-    fmt, net, str,
+    cell::{Ref, RefCell, RefMut},
+    fmt, mem, net,
+    rc::Rc,
+    str,
 };
 
 use http::{header, Method, Uri, Version};
@@ -19,6 +21,8 @@ use crate::{
 pub struct Request<P = PayloadStream> {
     pub(crate) payload: Payload<P>,
     pub(crate) head: Message<RequestHead>,
+    pub(crate) conn_data: Option<Rc<Extensions>>,
+    pub(crate) req_data: RefCell<Extensions>,
 }
 
 impl<P> HttpMessage for Request<P> {
@@ -30,19 +34,19 @@ impl<P> HttpMessage for Request<P> {
     }
 
     fn take_payload(&mut self) -> Payload<P> {
-        std::mem::replace(&mut self.payload, Payload::None)
+        mem::replace(&mut self.payload, Payload::None)
     }
 
     /// Request extensions
     #[inline]
     fn extensions(&self) -> Ref<'_, Extensions> {
-        self.head.extensions()
+        self.req_data.borrow()
     }
 
     /// Mutable reference to a the request's extensions
     #[inline]
     fn extensions_mut(&self) -> RefMut<'_, Extensions> {
-        self.head.extensions_mut()
+        self.req_data.borrow_mut()
     }
 }
 
@@ -51,6 +55,8 @@ impl From<Message<RequestHead>> for Request<PayloadStream> {
         Request {
             head,
             payload: Payload::None,
+            req_data: RefCell::new(Extensions::default()),
+            conn_data: None,
         }
     }
 }
@@ -61,6 +67,8 @@ impl Request<PayloadStream> {
         Request {
             head: Message::new(),
             payload: Payload::None,
+            req_data: RefCell::new(Extensions::default()),
+            conn_data: None,
         }
     }
 }
@@ -71,16 +79,21 @@ impl<P> Request<P> {
         Request {
             payload,
             head: Message::new(),
+            req_data: RefCell::new(Extensions::default()),
+            conn_data: None,
         }
     }
 
     /// Create new Request instance
     pub fn replace_payload<P1>(self, payload: Payload<P1>) -> (Request<P1>, Payload<P>) {
         let pl = self.payload;
+
         (
             Request {
                 payload,
                 head: self.head,
+                req_data: self.req_data,
+                conn_data: self.conn_data,
             },
             pl,
         )
@@ -93,7 +106,7 @@ impl<P> Request<P> {
 
     /// Get request's payload
     pub fn take_payload(&mut self) -> Payload<P> {
-        std::mem::replace(&mut self.payload, Payload::None)
+        mem::replace(&mut self.payload, Payload::None)
     }
 
     /// Split request into request head and payload
@@ -116,7 +129,7 @@ impl<P> Request<P> {
 
     /// Mutable reference to the message's headers.
     pub fn headers_mut(&mut self) -> &mut HeaderMap {
-        &mut self.head_mut().headers
+        &mut self.head.headers
     }
 
     /// Request's uri.
@@ -128,7 +141,7 @@ impl<P> Request<P> {
     /// Mutable reference to the request's uri.
     #[inline]
     pub fn uri_mut(&mut self) -> &mut Uri {
-        &mut self.head_mut().uri
+        &mut self.head.uri
     }
 
     /// Read the Request method.
@@ -169,6 +182,31 @@ impl<P> Request<P> {
     #[inline]
     pub fn peer_addr(&self) -> Option<net::SocketAddr> {
         self.head().peer_addr
+    }
+
+    /// Returns a reference a piece of connection data set in an [on-connect] callback.
+    ///
+    /// ```ignore
+    /// let opt_t = req.conn_data::<PeerCertificate>();
+    /// ```
+    ///
+    /// [on-connect]: crate::HttpServiceBuilder::on_connect_ext
+    pub fn conn_data<T: 'static>(&self) -> Option<&T> {
+        self.conn_data
+            .as_deref()
+            .and_then(|container| container.get::<T>())
+    }
+
+    /// Returns the connection data container if an [on-connect] callback was registered.
+    ///
+    /// [on-connect]: crate::HttpServiceBuilder::on_connect_ext
+    pub fn take_conn_data(&mut self) -> Option<Rc<Extensions>> {
+        self.conn_data.take()
+    }
+
+    /// Returns the request data container, leaving an empty one in it's place.
+    pub fn take_req_data(&mut self) -> Extensions {
+        mem::take(&mut self.req_data.get_mut())
     }
 }
 
