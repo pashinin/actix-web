@@ -14,6 +14,7 @@
 * `header::QualityItem::{max, min}`. [#2486]
 * `header::Quality::{MAX, MIN}`. [#2486]
 * `impl Display` for `header::Quality`. [#2486]
+* `impl Eq` for `header::ContentEncoding`. [#????]
 
 ### Changed
 * Rename `body::BoxBody::{from_body => new}`. [#2468]
@@ -39,6 +40,7 @@
 [#1920]: https://github.com/actix/actix-web/pull/1920
 [#2486]: https://github.com/actix/actix-web/pull/2486
 [#2488]: https://github.com/actix/actix-web/pull/2488
+[#????]: https://github.com/actix/actix-web/pull/????
 
 
 ## 3.0.0-beta.14 - 2021-11-30
