@@ -43,5 +43,7 @@ tokio-uring = { version = "0.1", optional = true }
 
 [dev-dependencies]
 actix-rt = "2.2"
-actix-test = "0.1.0-beta.8"
-actix-web = "4.0.0-beta.14"
+# actix-test = "0.1.0-beta.8"
+actix-test = { git = "https://github.com/pashinin/actix-web.git", branch = "version-fix", package = "actix-test" }
+# actix-web = "4.0.0-beta.14"
+actix-web = { git = "https://github.com/pashinin/actix-web.git", branch = "version-fix", package = "actix-web" }
